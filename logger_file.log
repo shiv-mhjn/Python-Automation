@@ -1,0 +1,1320 @@
+2026-09-01 23:10:29,146 - logger_setup - INFO - current timing is 2026-09-01 23:10:29.146221
+2026-09-01 23:10:29,146 - logger_setup - INFO - output dir is c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis
+2026-09-01 23:10:29,146 - logger_setup - INFO - file_path_1 = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:10:29,146 - logger_setup - INFO - output_dir_path = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-01 23:10:29,146 - logger_setup - INFO - File Name is segment_analysis_2026-08.zip
+2026-09-01 23:10:29,146 - logger_setup - INFO - previous_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl AS t3 ON (a.purchaseid = t3.purchase_id)
+    WHERE a.snapshot_date = '2026-07-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-07-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_07_2026__offline_loandata_tbl 
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-01 23:10:29,146 - logger_setup - INFO - current_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos,
+    NULL AS previous_month_pos,
+    NULL AS current_month_disbursement,
+    NULL AS current_month_collections,
+    NULL AS calculation,
+    NULL AS difference
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl AS t3 ON a.purchaseid = t3.purchase_id
+    WHERE a.snapshot_date = '2026-08-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-08-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-01 23:10:29,146 - logger_setup - INFO - current_month_disbursement_micro_lap = 
+SELECT
+    Platform,
+    disb_mon,
+    Product_name,
+    COALESCE(Platform, '') || COALESCE(product_name, '') AS concat,
+    loan_count,
+    amount_disb
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN kbnbfc_principaldue END) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        'Offline' AS product_name,
+        COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+        CAST(SUM(principal) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        ldt.erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN principaldue END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.erp_product_name NOT IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(datetime(b.disbursedon, '+5 hours', '+30 minutes')) AS disb_mon,
+        c.erp_product_name AS product_name,
+        COUNT(a.kbloanid) AS loan_count,
+        CAST(SUM(CASE
+            WHEN trancheNo = 1 THEN (CAST(amount AS REAL) + CAST(agreementFees AS REAL) +
+                                     CAST(processingFees AS REAL) + CAST(insuranceFee AS REAL) +
+                                     CAST(gstFees AS REAL))
+            ELSE CAST(amount AS REAL)
+        END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_loan a
+    JOIN findata_dbl_lap_31_08_2026__yp_tranche_disbursals b ON a.id = b.loanid
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl c ON a.id = c.loan_id
+    WHERE datetime(b.disbursedon, '+5 hours', '+30 minutes') >= '2026-08-01 00:00:00'
+      AND datetime(b.disbursedon, '+5 hours', '+30 minutes') <= '2026-08-31 23:59:59'
+      AND b.state = 87 AND c.erp_product_name IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-01 23:10:29,146 - logger_setup - INFO - current_month_collections_kb = 
+SELECT
+    Platform,
+    collected_month,
+    erp_product_name,
+    COALESCE(Platform,'') || COALESCE(erp_product_name,'') AS concat,
+    principal_collection_kbnbfc
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        erp_product_name,
+        CAST(SUM(COALESCE(kbnbfc_principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.product_name != 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', principal_paid_date) AS collected_month,
+        'CARD' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__card_new_recon
+    WHERE DATE(principal_paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND purchase_type IN ('purchase', 'bankWithdrawal')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KZ' AS Platform,
+        strftime('%Y-%m-%d', emi_partital_paid_date) AS collected_month,
+        'KZ' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kz_31_08_2026__yp_emi_data_tbl a
+    WHERE emi_partital_paid_date BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name IN ('KB', 'KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'offline' AS Platform,
+        strftime('%Y-%m-%d', paid_date) AS collected_month,
+        'offline' AS erp_product_name,
+        CAST(SUM(principalpaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        ldt.erp_product_name,
+        CAST(SUM(COALESCE(principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_dbl_lap_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Krazybee_Student' AS Platform,
+        strftime('%Y-%m-%d', paiddate) AS collected_month,
+        'Krazybee_Student' AS erp_product_name,
+        CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+    WHERE paiddate BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name = 'KBNBFC'
+    GROUP BY 1, 2
+
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-01 23:10:29,146 - logger_setup - INFO - partner_previous_month_pos_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-07-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-01 23:10:29,146 - logger_setup - INFO - partner_pos_current_month_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos,
+    NULL AS previous_pos,
+    NULL AS current_disbursement,
+    NULL AS current_collections,
+    NULL AS calculations,
+    NULL AS difference
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-08-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-01 23:10:29,146 - logger_setup - INFO - partner_current_disbursement_kb = 
+SELECT
+    strftime('%Y-%m-%d', disbursed_date) AS disb_mon,
+    erp_product_name,
+    COUNT(DISTINCT emi.loan_id) AS loan_count,
+    CAST(SUM(CASE WHEN installment_number = 1 THEN partner_principaldue END) AS REAL) AS amount_disb
+FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND emi.state IN ('disbursed', 'closed')
+  AND emi.kbnbfc_fund_allocation_percent BETWEEN 1 AND 99
+GROUP BY 1, 2
+ORDER BY 1 DESC, 2;
+2026-09-01 23:10:29,146 - logger_setup - INFO - partner_current_month_collections_kb = 
+SELECT
+    strftime('%Y-%m-%d', txndate) AS collected_month,
+    erp_product_name,
+    CAST(SUM(COALESCE(partner_principal_paid, 0)) AS REAL) AS principal_collection_Partner
+FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND partner_principal_paid > 0
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-01 23:10:29,146 - logger_setup - INFO - Installment_count_kb = 
+SELECT 
+    'KB' AS Platform,
+    ldt.erp_product_name,
+    COUNT(DISTINCT ldt.loan_id) AS Loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt
+JOIN findata_kb_31_08_2026__yp_loan_installments emi ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'KZ' AS Platform,
+    l.productname,
+    COUNT(DISTINCT l.id) AS Loan_Count,
+    COUNT(li.id) AS Installment_count
+FROM findata_kz_31_08_2026__yp_loan l
+JOIN findata_kz_31_08_2026__yp_loan_installments li ON l.id = li.loanid
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+    ldt.product_name,
+    COUNT(DISTINCT emi.loanid) AS loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_dbl_lap_31_08_2026__yp_loan_installments emi
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Offline' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_kb_31_08_2026__offline_loandata_tbl
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Krazybee-Stu' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT OrderID) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+GROUP BY 1, 2
+
+ORDER BY 1, 2;
+2026-09-01 23:10:29,146 - logger_setup - INFO - daily_aum_kb = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum,
+    SUM(da_assignee_pan_level_aum) AS da_aum,
+    SUM(pan_level_aum_kbnbfc) - SUM(da_assignee_pan_level_aum) AS net_aum
+FROM kreditbee_bi_dw_athena__kb_aum_loan_snapshot_archived aum
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-01 23:10:29,146 - logger_setup - INFO - daily_aum_offline = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum
+FROM kreditbee_bi_dw_athena__offline_aum_loan_snapshot_archived aum
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-01 23:10:29,146 - logger_setup - INFO - krazybee_student = 
+SELECT
+    strftime('%Y-%m-%d', paiddate) AS paid_mon,
+    'Krazybee' AS Product,
+    CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+WHERE paiddate BETWEEN '2026-07-01 00:00:00' AND '2026-08-31 23:59:59' 
+  AND fund_name = 'KBNBFC'
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-01 23:10:29,146 - logger_setup - INFO - Executing local queries using in-memory SQLite...
+2026-09-01 23:10:29,146 - logger_setup - INFO - previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,157 - logger_setup - INFO - current_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,159 - logger_setup - INFO - current_month_disbursement_micro_lap data fetched successfully moving towards next...
+2026-09-01 23:10:29,160 - logger_setup - INFO - current_month_collections_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,162 - logger_setup - INFO - partner_previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,163 - logger_setup - INFO - partner_pos_current_month_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,164 - logger_setup - INFO - partner_current_disbursement_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,164 - logger_setup - INFO - partner_current_month_collections_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,165 - logger_setup - INFO - Installment_count_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,167 - logger_setup - INFO - daily_aum_kb data fetched successfully moving towards next...
+2026-09-01 23:10:29,167 - logger_setup - INFO - daily_aum_offline data fetched successfully moving towards next...
+2026-09-01 23:10:29,169 - logger_setup - INFO - krazybee_student data fetched successfully moving towards next...
+2026-09-01 23:10:29,169 - logger_setup - INFO - All DataFrames fetched successfully from SQLite. Writing to Excel...
+2026-09-01 23:10:29,230 - logger_setup - INFO - Segment Analysis Excel generated successfully: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:10:29,230 - logger_setup - INFO - Added to ZIP: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:10:29,230 - logger_setup - INFO - Created ZIP file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-01 23:10:29,230 - logger_setup - INFO - Cleaned up standalone file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:13:15,487 - logger_setup - INFO - current timing is 2026-09-01 23:13:15.487147
+2026-09-01 23:13:15,489 - logger_setup - INFO - output dir is c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis
+2026-09-01 23:13:15,490 - logger_setup - INFO - file_path_1 = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:13:15,490 - logger_setup - INFO - output_dir_path = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-01 23:13:15,490 - logger_setup - INFO - File Name is segment_analysis_2026-08.zip
+2026-09-01 23:13:15,490 - logger_setup - INFO - previous_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl AS t3 ON (a.purchaseid = t3.purchase_id)
+    WHERE a.snapshot_date = '2026-07-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-07-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_07_2026__offline_loandata_tbl 
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-01 23:13:15,490 - logger_setup - INFO - current_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos,
+    NULL AS previous_month_pos,
+    NULL AS current_month_disbursement,
+    NULL AS current_month_collections,
+    NULL AS calculation,
+    NULL AS difference
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl AS t3 ON a.purchaseid = t3.purchase_id
+    WHERE a.snapshot_date = '2026-08-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-08-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-01 23:13:15,490 - logger_setup - INFO - current_month_disbursement_micro_lap = 
+SELECT
+    Platform,
+    disb_mon,
+    Product_name,
+    COALESCE(Platform, '') || COALESCE(product_name, '') AS concat,
+    loan_count,
+    amount_disb
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN kbnbfc_principaldue END) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        'Offline' AS product_name,
+        COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+        CAST(SUM(principal) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        ldt.erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN principaldue END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.erp_product_name NOT IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(datetime(b.disbursedon, '+5 hours', '+30 minutes')) AS disb_mon,
+        c.erp_product_name AS product_name,
+        COUNT(a.kbloanid) AS loan_count,
+        CAST(SUM(CASE
+            WHEN trancheNo = 1 THEN (CAST(amount AS REAL) + CAST(agreementFees AS REAL) +
+                                     CAST(processingFees AS REAL) + CAST(insuranceFee AS REAL) +
+                                     CAST(gstFees AS REAL))
+            ELSE CAST(amount AS REAL)
+        END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_loan a
+    JOIN findata_dbl_lap_31_08_2026__yp_tranche_disbursals b ON a.id = b.loanid
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl c ON a.id = c.loan_id
+    WHERE datetime(b.disbursedon, '+5 hours', '+30 minutes') >= '2026-08-01 00:00:00'
+      AND datetime(b.disbursedon, '+5 hours', '+30 minutes') <= '2026-08-31 23:59:59'
+      AND b.state = 87 AND c.erp_product_name IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-01 23:13:15,490 - logger_setup - INFO - current_month_collections_kb = 
+SELECT
+    Platform,
+    collected_month,
+    erp_product_name,
+    COALESCE(Platform,'') || COALESCE(erp_product_name,'') AS concat,
+    principal_collection_kbnbfc
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        erp_product_name,
+        CAST(SUM(COALESCE(kbnbfc_principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.product_name != 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', principal_paid_date) AS collected_month,
+        'CARD' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__card_new_recon
+    WHERE DATE(principal_paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND purchase_type IN ('purchase', 'bankWithdrawal')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KZ' AS Platform,
+        strftime('%Y-%m-%d', emi_partital_paid_date) AS collected_month,
+        'KZ' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kz_31_08_2026__yp_emi_data_tbl a
+    WHERE emi_partital_paid_date BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name IN ('KB', 'KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'offline' AS Platform,
+        strftime('%Y-%m-%d', paid_date) AS collected_month,
+        'offline' AS erp_product_name,
+        CAST(SUM(principalpaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        ldt.erp_product_name,
+        CAST(SUM(COALESCE(principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_dbl_lap_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Krazybee_Student' AS Platform,
+        strftime('%Y-%m-%d', paiddate) AS collected_month,
+        'Krazybee_Student' AS erp_product_name,
+        CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+    WHERE paiddate BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name = 'KBNBFC'
+    GROUP BY 1, 2
+
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-01 23:13:15,490 - logger_setup - INFO - partner_previous_month_pos_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-07-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-01 23:13:15,490 - logger_setup - INFO - partner_pos_current_month_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos,
+    NULL AS previous_pos,
+    NULL AS current_disbursement,
+    NULL AS current_collections,
+    NULL AS calculations,
+    NULL AS difference
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-08-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-01 23:13:15,492 - logger_setup - INFO - partner_current_disbursement_kb = 
+SELECT
+    strftime('%Y-%m-%d', disbursed_date) AS disb_mon,
+    erp_product_name,
+    COUNT(DISTINCT emi.loan_id) AS loan_count,
+    CAST(SUM(CASE WHEN installment_number = 1 THEN partner_principaldue END) AS REAL) AS amount_disb
+FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND emi.state IN ('disbursed', 'closed')
+  AND emi.kbnbfc_fund_allocation_percent BETWEEN 1 AND 99
+GROUP BY 1, 2
+ORDER BY 1 DESC, 2;
+2026-09-01 23:13:15,492 - logger_setup - INFO - partner_current_month_collections_kb = 
+SELECT
+    strftime('%Y-%m-%d', txndate) AS collected_month,
+    erp_product_name,
+    CAST(SUM(COALESCE(partner_principal_paid, 0)) AS REAL) AS principal_collection_Partner
+FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND partner_principal_paid > 0
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-01 23:13:15,492 - logger_setup - INFO - Installment_count_kb = 
+SELECT 
+    'KB' AS Platform,
+    ldt.erp_product_name,
+    COUNT(DISTINCT ldt.loan_id) AS Loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt
+JOIN findata_kb_31_08_2026__yp_loan_installments emi ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'KZ' AS Platform,
+    l.productname,
+    COUNT(DISTINCT l.id) AS Loan_Count,
+    COUNT(li.id) AS Installment_count
+FROM findata_kz_31_08_2026__yp_loan l
+JOIN findata_kz_31_08_2026__yp_loan_installments li ON l.id = li.loanid
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+    ldt.product_name,
+    COUNT(DISTINCT emi.loanid) AS loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_dbl_lap_31_08_2026__yp_loan_installments emi
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Offline' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_kb_31_08_2026__offline_loandata_tbl
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Krazybee-Stu' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT OrderID) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+GROUP BY 1, 2
+
+ORDER BY 1, 2;
+2026-09-01 23:13:15,492 - logger_setup - INFO - daily_aum_kb = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum,
+    SUM(da_assignee_pan_level_aum) AS da_aum,
+    SUM(pan_level_aum_kbnbfc) - SUM(da_assignee_pan_level_aum) AS net_aum
+FROM kreditbee_bi_dw_athena__kb_aum_loan_snapshot_archived aum
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-01 23:13:15,492 - logger_setup - INFO - daily_aum_offline = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum
+FROM kreditbee_bi_dw_athena__offline_aum_loan_snapshot_archived aum
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-01 23:13:15,492 - logger_setup - INFO - krazybee_student = 
+SELECT
+    strftime('%Y-%m-%d', paiddate) AS paid_mon,
+    'Krazybee' AS Product,
+    CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+WHERE paiddate BETWEEN '2026-07-01 00:00:00' AND '2026-08-31 23:59:59' 
+  AND fund_name = 'KBNBFC'
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-01 23:13:15,492 - logger_setup - INFO - Executing local queries using in-memory SQLite...
+2026-09-01 23:13:15,493 - logger_setup - INFO - previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,495 - logger_setup - INFO - current_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,497 - logger_setup - INFO - current_month_disbursement_micro_lap data fetched successfully moving towards next...
+2026-09-01 23:13:15,498 - logger_setup - INFO - current_month_collections_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,500 - logger_setup - INFO - partner_previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,500 - logger_setup - INFO - partner_pos_current_month_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,501 - logger_setup - INFO - partner_current_disbursement_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,501 - logger_setup - INFO - partner_current_month_collections_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,503 - logger_setup - INFO - Installment_count_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,504 - logger_setup - INFO - daily_aum_kb data fetched successfully moving towards next...
+2026-09-01 23:13:15,504 - logger_setup - INFO - daily_aum_offline data fetched successfully moving towards next...
+2026-09-01 23:13:15,506 - logger_setup - INFO - krazybee_student data fetched successfully moving towards next...
+2026-09-01 23:13:15,506 - logger_setup - INFO - All DataFrames fetched successfully from SQLite. Writing to Excel...
+2026-09-01 23:13:15,580 - logger_setup - INFO - Segment Analysis Excel generated successfully: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:13:15,580 - logger_setup - INFO - Added to ZIP: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-01 23:13:15,580 - logger_setup - INFO - Created ZIP file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-01 23:13:15,580 - logger_setup - INFO - Cleaned up standalone file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-02 18:38:32,317 - logger_setup - INFO - current timing is 2026-09-02 18:38:32.317731
+2026-09-02 18:38:32,317 - logger_setup - INFO - output dir is c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis
+2026-09-02 18:38:32,317 - logger_setup - INFO - file_path_1 = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-02 18:38:32,317 - logger_setup - INFO - output_dir_path = c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-02 18:38:32,317 - logger_setup - INFO - File Name is segment_analysis_2026-08.zip
+2026-09-02 18:38:32,317 - logger_setup - INFO - previous_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl AS t3 ON (a.purchaseid = t3.purchase_id)
+    WHERE a.snapshot_date = '2026-07-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-07-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_07_2026__offline_loandata_tbl 
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-07-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-02 18:38:32,317 - logger_setup - INFO - current_month_pos_kb_query = 
+SELECT
+    Platform,
+    snapshot_date,
+    erp_product_name,
+    COALESCE(Platform, '') || COALESCE(erp_product_name, '') AS concat,
+    kbnbfc_pos,
+    NULL AS previous_month_pos,
+    NULL AS current_month_disbursement,
+    NULL AS current_month_collections,
+    NULL AS calculation,
+    NULL AS difference
+FROM (
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND aum.product_name <> 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KB' AS Platform,
+        strftime('%Y-%m', a.snapshot_date) AS snapshot_date,
+        'CARD' AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__AUM_loan_snapshot_2_res_3 a
+    JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl AS t3 ON a.purchaseid = t3.purchase_id
+    WHERE a.snapshot_date = '2026-08-31' AND a.product_name = 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'KZ' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        'KZ' AS erp_product_name,
+        CAST(SUM(pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kz__AUM_loan_snapshot_2_res_3 aum
+    WHERE snapshot_date = '2026-08-31' AND fund_name IN ('KB','KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'Offline' AS Platform,
+        '' AS snapshot_date,
+        'Offline' AS erp_product_name,
+        CAST(SUM(principal) AS REAL) AS kbnbfc_pos
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE paid_date IS NULL
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m', snapshot_date) AS snapshot_date,
+        ldt.erp_product_name AS erp_product_name,
+        CAST(SUM(kbnbfc_pos) AS REAL) AS kbnbfc_pos
+    FROM summary_kb__DBL_LAP_offline_aum_loan_snapshot aum
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+    WHERE snapshot_date = '2026-08-31' AND platform <> 'Offline'
+    GROUP BY 1, 2, 3
+);
+2026-09-02 18:38:32,317 - logger_setup - INFO - current_month_disbursement_micro_lap = 
+SELECT
+    Platform,
+    disb_mon,
+    Product_name,
+    COALESCE(Platform, '') || COALESCE(product_name, '') AS concat,
+    loan_count,
+    amount_disb
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN kbnbfc_principaldue END) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Offline' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        'Offline' AS product_name,
+        COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+        CAST(SUM(principal) AS REAL) AS amount_disb
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(disbursed_date) AS disb_mon,
+        ldt.erp_product_name AS product_name,
+        COUNT(DISTINCT emi.loan_id) AS loan_count,
+        CAST(SUM(CASE WHEN installment_number = 1 THEN principaldue END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_emi_data_tbl emi
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+    WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.erp_product_name NOT IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        DATE(datetime(b.disbursedon, '+5 hours', '+30 minutes')) AS disb_mon,
+        c.erp_product_name AS product_name,
+        COUNT(a.kbloanid) AS loan_count,
+        CAST(SUM(CASE
+            WHEN trancheNo = 1 THEN (CAST(amount AS REAL) + CAST(agreementFees AS REAL) +
+                                     CAST(processingFees AS REAL) + CAST(insuranceFee AS REAL) +
+                                     CAST(gstFees AS REAL))
+            ELSE CAST(amount AS REAL)
+        END) AS REAL) AS amount_disb
+    FROM findata_dbl_lap_31_08_2026__yp_loan a
+    JOIN findata_dbl_lap_31_08_2026__yp_tranche_disbursals b ON a.id = b.loanid
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl c ON a.id = c.loan_id
+    WHERE datetime(b.disbursedon, '+5 hours', '+30 minutes') >= '2026-08-01 00:00:00'
+      AND datetime(b.disbursedon, '+5 hours', '+30 minutes') <= '2026-08-31 23:59:59'
+      AND b.state = 87 AND c.erp_product_name IN ('LAP','MICRO_LAP')
+    GROUP BY 1, 2, 3
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-02 18:38:32,317 - logger_setup - INFO - current_month_collections_kb = 
+SELECT
+    Platform,
+    collected_month,
+    erp_product_name,
+    COALESCE(Platform,'') || COALESCE(erp_product_name,'') AS concat,
+    principal_collection_kbnbfc
+FROM (
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        erp_product_name,
+        CAST(SUM(COALESCE(kbnbfc_principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND ldt.product_name != 'CARD'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KB' AS Platform,
+        strftime('%Y-%m-%d', principal_paid_date) AS collected_month,
+        'CARD' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__card_new_recon
+    WHERE DATE(principal_paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+      AND purchase_type IN ('purchase', 'bankWithdrawal')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'KZ' AS Platform,
+        strftime('%Y-%m-%d', emi_partital_paid_date) AS collected_month,
+        'KZ' AS erp_product_name,
+        CAST(SUM(principal_paid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kz_31_08_2026__yp_emi_data_tbl a
+    WHERE emi_partital_paid_date BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name IN ('KB', 'KBP')
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'offline' AS Platform,
+        strftime('%Y-%m-%d', paid_date) AS collected_month,
+        'offline' AS erp_product_name,
+        CAST(SUM(principalpaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_kb_31_08_2026__offline_loandata_tbl
+    WHERE DATE(paid_date) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+        strftime('%Y-%m-%d', txndate) AS collected_month,
+        ldt.erp_product_name,
+        CAST(SUM(COALESCE(principal_paid, 0)) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_dbl_lap_31_08_2026__yp_collections_data_tbl col
+    LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+    WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+    GROUP BY 1, 2, 3
+
+    UNION ALL
+
+    SELECT 
+        'Krazybee_Student' AS Platform,
+        strftime('%Y-%m-%d', paiddate) AS collected_month,
+        'Krazybee_Student' AS erp_product_name,
+        CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+    FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+    WHERE paiddate BETWEEN '2026-08-01 00:00:00' AND '2026-08-31 23:59:59'
+      AND fund_name = 'KBNBFC'
+    GROUP BY 1, 2
+
+    ORDER BY 1, 3, 2 DESC
+);
+2026-09-02 18:38:32,317 - logger_setup - INFO - partner_previous_month_pos_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_07_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-07-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-02 18:38:32,317 - logger_setup - INFO - partner_pos_current_month_kb = 
+SELECT 
+    strftime('%Y-%m', snapshot_date) AS snapshot_date,
+    erp_product_name,
+    CAST(SUM(partner_pos) AS REAL) AS partner_pos,
+    NULL AS previous_pos,
+    NULL AS current_disbursement,
+    NULL AS current_collections,
+    NULL AS calculations,
+    NULL AS difference
+FROM summary_kb__AUM_loan_snapshot_2_res_3 aum
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date = '2026-08-31' AND aum.partner_pos > 0
+GROUP BY 1, 2
+ORDER BY 1, 2;
+2026-09-02 18:38:32,317 - logger_setup - INFO - partner_current_disbursement_kb = 
+SELECT
+    strftime('%Y-%m-%d', disbursed_date) AS disb_mon,
+    erp_product_name,
+    COUNT(DISTINCT emi.loan_id) AS loan_count,
+    CAST(SUM(CASE WHEN installment_number = 1 THEN partner_principaldue END) AS REAL) AS amount_disb
+FROM findata_kb_31_08_2026__yp_emi_data_tbl emi
+JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loan_id = ldt.loan_id
+WHERE DATE(disbursed_date) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND emi.state IN ('disbursed', 'closed')
+  AND emi.kbnbfc_fund_allocation_percent BETWEEN 1 AND 99
+GROUP BY 1, 2
+ORDER BY 1 DESC, 2;
+2026-09-02 18:38:32,317 - logger_setup - INFO - partner_current_month_collections_kb = 
+SELECT
+    strftime('%Y-%m-%d', txndate) AS collected_month,
+    erp_product_name,
+    CAST(SUM(COALESCE(partner_principal_paid, 0)) AS REAL) AS principal_collection_Partner
+FROM findata_kb_31_08_2026__yp_collections_data_tbl col
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON col.loanid = ldt.loan_id
+WHERE DATE(txndate) BETWEEN '2026-08-01' AND '2026-08-31'
+  AND partner_principal_paid > 0
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-02 18:38:32,317 - logger_setup - INFO - Installment_count_kb = 
+SELECT 
+    'KB' AS Platform,
+    ldt.erp_product_name,
+    COUNT(DISTINCT ldt.loan_id) AS Loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt
+JOIN findata_kb_31_08_2026__yp_loan_installments emi ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'KZ' AS Platform,
+    l.productname,
+    COUNT(DISTINCT l.id) AS Loan_Count,
+    COUNT(li.id) AS Installment_count
+FROM findata_kz_31_08_2026__yp_loan l
+JOIN findata_kz_31_08_2026__yp_loan_installments li ON l.id = li.loanid
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'DBL_LAP_TWL_POPSA_SCF' AS Platform,
+    ldt.product_name,
+    COUNT(DISTINCT emi.loanid) AS loan_count,
+    COUNT(emi.id) AS Installment_count
+FROM findata_dbl_lap_31_08_2026__yp_loan_installments emi
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON emi.loanid = ldt.loan_id
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Offline' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT Curr_New_Account_No) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_kb_31_08_2026__offline_loandata_tbl
+GROUP BY 1, 2
+
+UNION ALL
+
+SELECT 
+    'Krazybee-Stu' AS Platform,
+    '' AS product_name,
+    COUNT(DISTINCT OrderID) AS loan_count,
+    COUNT(*) AS installment_count
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+GROUP BY 1, 2
+
+ORDER BY 1, 2;
+2026-09-02 18:38:32,317 - logger_setup - INFO - daily_aum_kb = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum,
+    SUM(da_assignee_pan_level_aum) AS da_aum,
+    SUM(pan_level_aum_kbnbfc) - SUM(da_assignee_pan_level_aum) AS net_aum
+FROM kreditbee_bi_dw_athena__kb_aum_loan_snapshot_archived aum
+LEFT JOIN findata_kb_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-02 18:38:32,317 - logger_setup - INFO - daily_aum_offline = 
+SELECT
+    snapshot_date,
+    ldt.erp_product_name AS product,
+    SUM(pos) AS pos,
+    SUM(pan_level_aum_kbnbfc) AS total_aum
+FROM kreditbee_bi_dw_athena__offline_aum_loan_snapshot_archived aum
+LEFT JOIN findata_dbl_lap_31_08_2026__yp_loan_dimensional_tbl ldt ON aum.loan_id = ldt.loan_id
+WHERE snapshot_date BETWEEN '2026-08-01' AND '2026-08-31'
+GROUP BY 1, 2
+ORDER BY 1;
+2026-09-02 18:38:32,317 - logger_setup - INFO - krazybee_student = 
+SELECT
+    strftime('%Y-%m-%d', paiddate) AS paid_mon,
+    'Krazybee' AS Product,
+    CAST(SUM(PrincipalPaid) AS REAL) AS principal_collection_kbnbfc
+FROM findata_stu_31_08_2026__temp_all_emi_all_vw
+WHERE paiddate BETWEEN '2026-07-01 00:00:00' AND '2026-08-31 23:59:59' 
+  AND fund_name = 'KBNBFC'
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+2026-09-02 18:38:32,317 - logger_setup - INFO - Executing local queries using in-memory SQLite...
+2026-09-02 18:38:32,317 - logger_setup - INFO - previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,328 - logger_setup - INFO - current_month_pos_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,328 - logger_setup - INFO - current_month_disbursement_micro_lap data fetched successfully moving towards next...
+2026-09-02 18:38:32,328 - logger_setup - INFO - current_month_collections_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,328 - logger_setup - INFO - partner_previous_month_pos_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,335 - logger_setup - INFO - partner_pos_current_month_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,337 - logger_setup - INFO - partner_current_disbursement_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,338 - logger_setup - INFO - partner_current_month_collections_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,340 - logger_setup - INFO - Installment_count_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,343 - logger_setup - INFO - daily_aum_kb data fetched successfully moving towards next...
+2026-09-02 18:38:32,343 - logger_setup - INFO - daily_aum_offline data fetched successfully moving towards next...
+2026-09-02 18:38:32,345 - logger_setup - INFO - krazybee_student data fetched successfully moving towards next...
+2026-09-02 18:38:32,345 - logger_setup - INFO - All DataFrames fetched successfully from SQLite. Writing to Excel...
+2026-09-02 18:38:32,426 - logger_setup - INFO - Segment Analysis Excel generated successfully: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-02 18:38:32,427 - logger_setup - INFO - Added to ZIP: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
+2026-09-02 18:38:32,427 - logger_setup - INFO - Created ZIP file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\segment_analysis_2026-08.zip
+2026-09-02 18:38:32,429 - logger_setup - INFO - Cleaned up standalone file: c:\Users\shivam.mahajan\Desktop\Project\Excell_output\finance_monthly_segment_analysis\KBNBFC(2026-08).xlsx
